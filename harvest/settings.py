@@ -1,3 +1,14 @@
+import django
+import os
+import sys
+
+# Add the Django project's path to sys.path
+PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__name__)))
+
+sys.path.insert(0, PROJECT_DIR)
+os.environ['DJANGO_SETTINGS_MODULE'] = 'config.settings'
+django.setup()
+
 # Scrapy settings for harvest project
 #
 # For simplicity, this file contains only settings considered important or
@@ -62,9 +73,9 @@ ROBOTSTXT_OBEY = True
 
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
-# ITEM_PIPELINES = {
-#    "harvest.pipelines.HarvestPipeline": 300,
-# }
+ITEM_PIPELINES = {
+   "harvest.pipelines.HarvestPipeline": 300,
+}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html

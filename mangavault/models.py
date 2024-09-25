@@ -13,7 +13,7 @@ class MangaCategory(models.TextChoices):
 
 class MangaVault(models.Model):
     title = models.CharField(max_length=100)
-    website = models.ManyToOneRel(Harvester, on_delete=models.RESTRICT)
+    website = models.ForeignKey(Harvester, on_delete=models.RESTRICT)
     cover_img = models.URLField()
     description = models.TextField()
     vault_url = models.URLField()
