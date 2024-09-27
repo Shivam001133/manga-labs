@@ -5,6 +5,7 @@ from django.utils.translation import gettext_lazy as _
 class HarvestType(models.TextChoices):
     MANGA = "manga", _("Manga")
     ANIME = "anime", _("Anime")
+    BOTH = "both", _("Both")
     NONE = "none", _("None")
 
 
