@@ -35,7 +35,9 @@ class MangaGenre(models.Model):
 
 class MangaVault(models.Model):
     title = models.CharField(max_length=100)
-    website = models.ForeignKey(Harvester, on_delete=models.RESTRICT)
+    website = models.ForeignKey(
+        Harvester, on_delete=models.RESTRICT, related_name="manga_source"
+    )
     cover_img = models.URLField(unique=True)
     description = models.TextField()
     vault_url = models.URLField(unique=True)
@@ -52,3 +54,21 @@ class MangaVault(models.Model):
 
     def __str__(self) -> str:
         return self
+
+
+class MangaChapter(models.Model):
+    chapter_title = models.CharField(max_length=100)
+    manga = models.ForeignKey(
+        MangaVault, on_delete=models.CASCADE, related_name="manga_chapter"
+    )
+    chapter_url = models.URLField(unique=True)
+    chapter_number = models.PositiveSmallIntegerField(max_length=5)
+    is_new = models.BooleanField(default=False)
+    is_latest = models.BooleanField(default=False)
+    is_trending = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=False)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self) -> str:
+        return self.title
