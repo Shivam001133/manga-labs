@@ -1,9 +1,15 @@
 from django.core.management.base import BaseCommand
+
 # , CommandError
+from django.db.utils import IntegrityError
 from mangavault.models import MangaGenre
 from harvesters.models import HarvestType
 import requests
 import json
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
@@ -30,19 +36,19 @@ class Command(BaseCommand):
         if bulk:
             MangaGenre.objects.bulk_create(data)
         else:
-            for model_obj in data:
-                try:
-                    MangaGenre.objects.create(model_obj)
-                except Exception as e:  # noqa:BLE001
-                    print("***********", e)  # noqa:T201
-                    continue
-        self.style.SUCCESS("Genre created successful")
+            try:
+                genre = MangaGenre.objects.get(title=data["title"])
+                if genre.related_to == data["related_to"]:
+                    genre.related_to = HarvestType.BOTH
+            except IntegrityError:
+                MangaGenre.objects.create(**data)
+        logger.info("Genre created successful")
 
     def generate_genres(self, user_choice: str) -> None:
         base_url = "https://api.jikan.moe/v4/genres/"
         endpoint = ["m", "manga", "a", "anime"]
         res_data = []
-        user_choice_none = user_choice is None
+        user_choice_none = user_choice == "both"
         if user_choice in endpoint or user_choice_none:
             if user_choice[0] == endpoint[0] or user_choice_none:
                 res_data.append(self.send_request(url=base_url + "manga"))
@@ -51,41 +57,44 @@ class Command(BaseCommand):
             else:
                 res_data.append(self.send_request(url=base_url + "anime"))
         else:
-            self.style.WARNING(f"Please chose one of these option {endpoint}")
+            warning_mess = f"Please chose one of these option {endpoint}"
+            logger.warning(warning_mess)
 
         for info in res_data:
-            genre_data = info["data"][0]
+            genre_data = info["data"]
+            bulk_data = []
             r_t = [c_h for c_h in HarvestType if c_h._value_[0] == user_choice[0]]
-            if len(res_data) > 1 and info is res_data[-1]:
-                self.create_genre_entry(
-                    {
-                        "title": genre_data["name"],
-                        "description": "",
-                        "related_to": r_t[0],
-                        "is_active": True,
-                    }
-                )
-            elif r_t[0]._value_ in set("both", "manga"):
-                self.create_genre_entry(
-                    MangaGenre(
-                        title=genre_data["name"],
-                        description="",
-                        related_to=HarvestType.MANGA,
-                        is_active=True,
-                    ),
-                    bulk=True,
-                )
-            else:
-                self.create_genre_entry(
-                    MangaGenre(
-                        title=genre_data["name"],
-                        description="",
-                        related_to=r_t[0],
-                        is_active=True,
-                    ),
-                    bulk=True,
-                )
+            for genre in genre_data:
+                if len(res_data) > 1 and info is res_data[-1]:
+                    self.create_genre_entry(
+                        data={
+                            "title": genre["name"],
+                            "description": "",
+                            "related_to": r_t[0],
+                            "is_active": True,
+                        }
+                    )
+                elif r_t[0]._value_ in set({"both", "manga"}):
+                    bulk_data.append(
+                        MangaGenre(
+                            title=genre["name"],
+                            description="",
+                            related_to=HarvestType.MANGA,
+                            is_active=True,
+                        )
+                    )
+                else:
+                    bulk_data.append(
+                        MangaGenre(
+                            title=genre["name"],
+                            description="",
+                            related_to=r_t[0],
+                            is_active=True,
+                        )
+                    )
+            if bulk_data:
+                self.create_genre_entry(bulk_data, bulk=True)
 
     def handle(self, *args, **options):
         self.generate_genres(options.get("genre"))
-        self.style.SUCCESS("generate command completed :)")
+        logger.info("generate command completed :)")
