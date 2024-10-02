@@ -13,8 +13,41 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
   # psycopg dependencies
   libpq-dev
 
+
+# Install system dependencies for Playwright
+RUN apt-get update && apt-get install -y \
+libnss3 \
+libatk1.0-0 \
+libatk-bridge2.0-0 \
+libcups2 \
+libxcomposite1 \
+libxrandr2 \
+libxdamage1 \
+libxkbcommon0 \
+libpango-1.0-0 \
+libxshmfence1 \
+libgbm1 \
+libasound2 \
+libpangocairo-1.0-0 \
+libgtk-3-0 \
+libx11-xcb1 \
+libx11-6 \
+libxext6 \
+libx11-xcb-dev \
+libxcomposite-dev \
+libxdamage-dev \
+libxrandr-dev \
+libgbm-dev \
+libasound2-dev \
+libpangocairo-1.0-0 \
+libgtk-3-dev \
+&& rm -rf /var/lib/apt/lists/*
+
 # Requirements are installed here to ensure they will be cached.
 COPY ./requirements .
+
+# Install Playwright browsers
+RUN playwright install
 
 # Create Python Dependency and Sub-Dependency Wheels.
 RUN pip wheel --wheel-dir /usr/src/app/wheels  \

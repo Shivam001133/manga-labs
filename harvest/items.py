@@ -7,5 +7,5 @@ from scrapy_djangoitem import DjangoItem
 from mangavault.models import MangaVault
 
 
-class HarvestItem(DjangoItem):
+class MangaVaultItem(DjangoItem):
     django_model = MangaVault

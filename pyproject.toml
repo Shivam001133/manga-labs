@@ -135,6 +135,10 @@ ignore = [
     "ISC001",
 # To avoid import error (Import block is un-sorted or un-formatted)
     "I001",
+# To avide errro for Logging statement uses f-string
+    "G004",
+# To ignore commented code 
+    "ERA001",
 ]
 # The fixes in extend-unsafe-fixes will require
 # provide the `--unsafe-fixes` flag when fixing.

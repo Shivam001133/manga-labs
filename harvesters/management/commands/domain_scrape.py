@@ -8,7 +8,13 @@ class Command(BaseCommand):
     help = "Scrape data from given domain"
 
     def add_arguments(self, parser):
-        parser.add_argument("domain_name", type=str, help="The domain name to scrape")
+        parser.add_argument(
+            "--domain_name",
+            "-dn",
+            dest="domain_name",
+            type=str,
+            help="The domain name to scrape",
+        )
 
     def handle(self, *args, **kwargs):
         domain_name = kwargs["domain_name"]

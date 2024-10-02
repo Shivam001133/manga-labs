@@ -1,3 +1,4 @@
+from user_agent import generate_user_agent, generate_navigator
 import django
 import os
 import sys
@@ -8,6 +9,18 @@ PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__name__)))
 sys.path.insert(0, PROJECT_DIR)
 os.environ['DJANGO_SETTINGS_MODULE'] = 'config.settings'
 django.setup()
+
+# Scrapy settings for harvest project
+DOWNLOAD_HANDLERS = {
+    "http": "scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler",
+    "https": "scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler",
+}
+PLAYWRIGHT_BROWSER_TYPE = "firefox"
+PLAYWRIGHT_LAUNCH_OPTIONS = {
+    "headless": True,
+    "timeout": 20 * 1000,  # 20 seconds
+}
+PLAYWRIGHT_CDP_URL = "http://localhost:9222"
 
 # Scrapy settings for harvest project
 #
@@ -26,6 +39,10 @@ NEWSPIDER_MODULE = "harvest.spiders"
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 # USER_AGENT = "harvest (+http://www.yourdomain.com)"
+USER_AGENT = generate_user_agent(
+    os=("win", "linux", ),
+    navigator=generate_navigator(),
+    device_type="desktop")
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = True
@@ -61,9 +78,9 @@ ROBOTSTXT_OBEY = True
 
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
-# DOWNLOADER_MIDDLEWARES = {
-#    "harvest.middlewares.HarvestDownloaderMiddleware": 543,
-# }
+DOWNLOADER_MIDDLEWARES = {
+   "harvest.middlewares.HarvestDownloaderMiddleware": 543,
+}
 
 # Enable or disable extensions
 # See https://docs.scrapy.org/en/latest/topics/extensions.html
@@ -81,12 +98,12 @@ ITEM_PIPELINES = {
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
 # AUTOTHROTTLE_ENABLED = True
 # The initial download delay
-# AUTOTHROTTLE_START_DELAY = 5
+AUTOTHROTTLE_START_DELAY = 5
 # The maximum download delay to be set in case of high latencies
-# AUTOTHROTTLE_MAX_DELAY = 60
+AUTOTHROTTLE_MAX_DELAY = 60
 # The average number of requests Scrapy should be sending in parallel to
 # each remote server
-# AUTOTHROTTLE_TARGET_CONCURRENCY = 1.0
+AUTOTHROTTLE_TARGET_CONCURRENCY = 1.0
 # Enable showing throttling stats for every response received:
 # AUTOTHROTTLE_DEBUG = False
 
